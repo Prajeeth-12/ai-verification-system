@@ -1,25 +1,32 @@
 from fastapi import FastAPI
-
-try:
-    # When running from backend directory
-    from app.routes.upload import router as upload_router
-    from app.routes.ocr import router as ocr_router
-    from app.routes.parse import router as parse_router
-except ModuleNotFoundError:
-    # When running from workspace root
-    from backend.app.routes.upload import router as upload_router
-    from backend.app.routes.ocr import router as ocr_router
-    from backend.app.routes.parse import router as parse_router
+from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings
+from app.routes import upload
 
 app = FastAPI(
-    title="AI Verification System",
-    version="1.0.0"
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    description="AI-Powered Document Verification & Background Intelligence System"
 )
 
-app.include_router(upload_router)
-app.include_router(ocr_router)
-app.include_router(parse_router)
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/")
-def root():
-    return {"message": "AI Verification Backend Running"}
+# Include Routers
+app.include_router(upload.router, tags=["Upload"])
+
+@app.get("/", tags=["Root"])
+async def root():
+    return {
+        "message": f"Welcome to {settings.PROJECT_NAME} API",
+        "status": "Running",
+        "version": settings.VERSION
+    }
+
+# Swagger docs are automatically available at /docs

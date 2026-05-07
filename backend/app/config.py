@@ -1,20 +1,31 @@
+from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
 
-# API Keys
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-DATABASE_URL = os.getenv("DATABASE_URL")
-NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+class Settings(BaseSettings):
+    # App Settings
+    PROJECT_NAME: str = "AI Verification System"
+    VERSION: str = "1.0.0"
+    
+    # API Keys
+    NVIDIA_API_KEY: str = os.getenv("NVIDIA_API_KEY", "")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+    
+    # OCR Settings
+    NVIDIA_OCR_URL: str = "https://ai.api.nvidia.com/v1/cv/nvidia/nemoretriever-ocr-v1"
+    FALLBACK_OCR_ENABLED: bool = True
+    MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
+    
+    # Paths
+    UPLOAD_DIR: str = "app/uploads"
 
-# NVIDIA NIM OCR Configuration
-NVIDIA_OCR_API_URL = "https://ai.api.nvidia.com/v1/cv/nvidia/nemotron-ocr-v1"
-NVIDIA_OCR_MODEL = "nemotron-ocr-v1"
-NVIDIA_OCR_TIMEOUT = 30  # seconds
+    class Config:
+        case_sensitive = True
 
-# OCR Configuration
-OCR_FALLBACK_ENABLED = True  # Use EasyOCR as fallback if NVIDIA fails
-OCR_MAX_RETRIES = 2
-OCR_TIMEOUT = 30
-MAX_IMAGE_SIZE = 180_000  # Base64 character limit for NVIDIA API
+settings = Settings()
+
+# Ensure upload directory exists
+if not os.path.exists(settings.UPLOAD_DIR):
+    os.makedirs(settings.UPLOAD_DIR)
