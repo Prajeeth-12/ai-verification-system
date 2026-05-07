@@ -1,8 +1,15 @@
 from fastapi import FastAPI
 
-from app.routes.upload import router as upload_router
-from app.routes.ocr import router as ocr_router
-from app.routes.parse import router as parse_router
+try:
+    # When running from backend directory
+    from app.routes.upload import router as upload_router
+    from app.routes.ocr import router as ocr_router
+    from app.routes.parse import router as parse_router
+except ModuleNotFoundError:
+    # When running from workspace root
+    from backend.app.routes.upload import router as upload_router
+    from backend.app.routes.ocr import router as ocr_router
+    from backend.app.routes.parse import router as parse_router
 
 app = FastAPI(
     title="AI Verification System",

@@ -110,6 +110,7 @@ def extract_text_with_nvidia(image_path: str) -> Tuple[str, Dict]:
         }
         
         # Call NVIDIA OCR API
+        print("[DEBUG] CALLING NVIDIA OCR for:", image_path)
         start_time = time.time()
         response = requests.post(
             NVIDIA_OCR_API_URL,
@@ -138,6 +139,7 @@ def extract_text_with_nvidia(image_path: str) -> Tuple[str, Dict]:
         
         extracted_text = extracted_text.strip()
         
+        print("[DEBUG] NVIDIA OCR succeeded! Text length:", len(extracted_text))
         metadata["success"] = True
         metadata["extraction_time_ms"] = round(extraction_time * 1000, 2)
         
@@ -185,6 +187,7 @@ def extract_text_with_easyocr(image_path: str) -> Tuple[str, Dict]:
     }
     
     try:
+        print("[DEBUG] CALLING EASYOCR for:", image_path)
         reader = get_easyocr_reader()
         
         start_time = time.time()
@@ -194,6 +197,7 @@ def extract_text_with_easyocr(image_path: str) -> Tuple[str, Dict]:
         # Combine all detected text
         extracted_text = " ".join([text[1] for text in results])
         
+        print("[DEBUG] EASYOCR succeeded! Text length:", len(extracted_text))
         metadata["success"] = True
         metadata["extraction_time_ms"] = round(extraction_time * 1000, 2)
         metadata["text_blocks_detected"] = len(results)
@@ -225,7 +229,9 @@ def extract_text_from_pdf(pdf_path: str) -> Tuple[str, Dict]:
         "document_type": "pdf",
         "timestamp": datetime.now().isoformat(),
         "pages_processed": 0,
-        "providers_used": []
+        "providers_used": [],
+        "provider": None,
+        "success": False
     }
     
     try:
@@ -250,8 +256,14 @@ def extract_text_from_pdf(pdf_path: str) -> Tuple[str, Dict]:
                 text, fallback_metadata = extract_text_with_easyocr(temp_image_path)
                 page_metadata = fallback_metadata
             
+            # Track which providers were used
             if page_metadata["provider"] not in metadata["providers_used"]:
                 metadata["providers_used"].append(page_metadata["provider"])
+            
+            # Set top-level provider to first successful extraction method
+            if metadata["provider"] is None and page_metadata["success"]:
+                metadata["provider"] = page_metadata["provider"]
+                metadata["success"] = True
             
             full_text += f"[Page {page_num + 1}]\n{text}\n\n"
             metadata["pages_processed"] += 1
@@ -260,7 +272,6 @@ def extract_text_from_pdf(pdf_path: str) -> Tuple[str, Dict]:
         if os.path.exists(temp_image_path):
             os.remove(temp_image_path)
         
-        metadata["success"] = True
         return full_text, metadata
     
     except Exception as e:
@@ -295,18 +306,23 @@ def extract_text_from_image(image_path: str) -> Tuple[str, Dict]:
     
     try:
         # PRIMARY: Try NVIDIA NIM OCR
+        print(f"[DEBUG] extract_text_from_image() called with: {image_path}")
         text, nvidia_metadata = extract_text_with_nvidia(image_path)
         
         if nvidia_metadata["success"]:
+            print("[DEBUG] Image extraction: NVIDIA succeeded")
             metadata.update(nvidia_metadata)
             metadata["success"] = True
             return text, metadata
         
         # FALLBACK: Use EasyOCR if NVIDIA failed and fallback enabled
+        print(f"[DEBUG] Image extraction: NVIDIA failed, error = {nvidia_metadata.get('error')}")
         if OCR_FALLBACK_ENABLED:
+            print("[DEBUG] Image extraction: Trying EasyOCR fallback...")
             text, easyocr_metadata = extract_text_with_easyocr(image_path)
             
             if easyocr_metadata["success"]:
+                print("[DEBUG] Image extraction: EasyOCR fallback succeeded")
                 metadata.update(easyocr_metadata)
                 metadata["fallback_reason"] = nvidia_metadata.get("error")
                 metadata["success"] = True
