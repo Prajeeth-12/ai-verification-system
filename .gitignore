@@ -1,7 +1,12 @@
 venv/
 __pycache__/
-.env
+.env*
 *.pyc
 node_modules/
 dist/
 uploads/
+.agents/
+.kombai/
+*.log
+nul
+skills-lock.json

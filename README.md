@@ -1,60 +1,84 @@
 # AI-Powered Document Verification & Background Intelligence System
 
-An enterprise-grade AI system for document processing, verification, and fraud detection.
+An enterprise-grade AI system for automated document processing, verification, and fraud detection. This project demonstrates a production-oriented approach to building AI pipelines with hybrid OCR, structured parsing, and multi-agent orchestration.
 
-## 🚀 Project Roadmap
+## 🏗 System Architecture & Flow
 
-### Phase 1: Project Foundation ✅
-- FastAPI Backend initialized
-- Modular architecture (Routes, Services, Models)
-- Environment configuration system
-- Secure file upload endpoint
-- Auto-generated Swagger documentation
+```text
+Document Upload
+      ↓
+Resilient Hybrid OCR Engine (NVIDIA NIM + EasyOCR Fallback)
+      ↓
+Rule-Based Document Classification
+      ↓
+LLM-Driven Structured Parsing (Nemotron-3-Super)
+      ↓
+Verification Intelligence Engine (Cross-document consistency)
+      ↓
+Embedding-Based Semantic Analysis (FAISS + sentence-transformers)
+      ↓
+Automated Risk Report Generation
+```
 
-### Upcoming Phases
-- **Phase 2:** Hybrid OCR Pipeline (NVIDIA + EasyOCR)
-- **Phase 3:** Document Classification
-- **Phase 4:** Specialized AI Parsing
-- **Phase 5:** Verification Intelligence Engine
-- **Phase 6:** Embeddings + Vector Search (FAISS)
-- **Phase 7:** Multi-Agent Orchestration (LangGraph)
-- **Phase 8:** Report Generation (PDF)
-- **Phase 9:** Frontend Dashboard (Next.js)
+## 🚀 Key Engineering Features
+
+- **Resilient Hybrid OCR Pipeline**: Implemented a dual-engine architecture using NVIDIA NIM OCR as the primary engine with an automatic EasyOCR fallback for high availability.
+- **Agentic Workflow Orchestration**: Built using LangGraph to coordinate OCR, parsing, verification, and report generation pipelines in a deterministic state machine.
+- **Structured JSON Extraction**: Advanced prompt engineering for extracting high-fidelity structured data with Pydantic schema validation.
+- **Embedding-Based Semantic Verification**: Utilizes FAISS vector search and sentence embeddings to detect unsupported claims and inconsistencies across documents.
+- **Deterministic Classification**: Lightweight rule-based classification optimized for high-accuracy identification of standard IDs (Aadhaar, PAN) and professional documents.
+- **Explainable Verification**: Confidence scoring and detailed fraud signal detection for transparent decision-making.
+- **Modular Microservice Architecture**: Designed for scalability with clear separation between routing, business logic, and AI services.
+- **Containerized Deployment**: Fully dockerized environment for consistent development and production parity.
 
 ## 🛠 Tech Stack
-- **Backend:** FastAPI, Python 3.10+
-- **AI/ML:** NVIDIA NeMo Retriever OCR, EasyOCR, Nemotron-3-Super
-- **Orchestration:** LangGraph, LangChain
-- **Database:** FAISS (Vector), PostgreSQL (Relational)
-- **Frontend:** Next.js, Tailwind CSS
+
+| Domain | Technology |
+| :--- | :--- |
+| **Backend** | FastAPI |
+| **Primary OCR** | NVIDIA NeMo Retriever OCR |
+| **Fallback OCR** | EasyOCR |
+| **LLM (Parsing)** | Nemotron-3-Super |
+| **Embeddings** | sentence-transformers |
+| **Vector DB** | FAISS |
+| **Orchestration** | LangGraph |
+| **Frontend** | Next.js 15 (App Router) |
+| **Styling** | Tailwind CSS |
+| **Deployment** | Docker |
 
 ## ⚙️ Setup & Installation
 
-### Backend Setup
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Create a `.env` file in the `backend/` directory:
-   ```env
-   NVIDIA_API_KEY=your_key_here
-   DATABASE_URL=sqlite:///./test.db
-   ```
-5. Run the server:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+### 1. Environment Configuration
+Create a `.env` file in the `backend/` directory:
+```env
+NVIDIA_API_KEY=your_nvidia_api_key
+SECRET_KEY=your_jwt_secret_key
+DATABASE_URL=sqlite:///./test.db
+```
 
-## 📄 Documentation
-Once the server is running, visit:
-- Swagger UI: `http://localhost:8000/docs`
-- Redoc: `http://localhost:8000/redoc`
+### 2. Docker Deployment (Recommended)
+```bash
+docker-compose up --build
+```
+
+### 3. Manual Installation
+**Backend:**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## 📄 API Documentation
+Once the backend is running, comprehensive documentation is available at:
+- **Swagger UI**: `http://localhost:8000/docs`
+- **Redoc**: `http://localhost:8000/redoc`

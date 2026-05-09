@@ -13,6 +13,9 @@ faiss-cpu
 sentence-transformers
 sqlalchemy
 psycopg2-binary
+supabase
 langgraph
 langchain-core
 langchain-openai
+PyJWT
+passlib[bcrypt]
